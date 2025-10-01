@@ -379,7 +379,9 @@
         let callData = {
             users: {},
             totalCalls: 0,
-            totalDuration: 0
+            totalDuration: 0,
+            totalAttempts: 0,
+            successfulCalls: 0
         };
 
         // 初始化拖放功能
@@ -463,7 +465,9 @@
             callData = {
                 users: {},
                 totalCalls: 0,
-                totalDuration: 0
+                totalDuration: 0,
+                totalAttempts: 0,
+                successfulCalls: 0
             };
 
             const lines = content.split('\n');
@@ -472,79 +476,68 @@
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // 匹配通話記錄格式：時間 使用者名稱 ☎ 通話時間XX:XX
-                const callMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+通話時間(.+)$/);
+                // 匹配成功的通話記錄：時間 使用者名稱 ☎ 通話時間XX:XX
+                const successfulCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+通話時間(.+)$/);
 
-                if (callMatch) {
-                    const userName = callMatch[4].trim();
-                    const durationStr = callMatch[5].trim();
+                if (successfulCallMatch) {
+                    const userName = successfulCallMatch[4].trim();
+                    const durationStr = successfulCallMatch[5].trim();
                     const duration = parseCallDuration(durationStr);
 
+                    // 初始化用戶數據
+                    if (!callData.users[userName]) {
+                        callData.users[userName] = {
+                            name: userName,
+                            successfulCalls: 0,
+                            failedCalls: 0,
+                            totalDuration: 0,
+                            totalAttempts: 0
+                        };
+                    }
+
                     if (duration > 0) {
-                        // 初始化用戶數據
-                        if (!callData.users[userName]) {
-                            callData.users[userName] = {
-                                name: userName,
-                                outgoingCalls: 0,
-                                outgoingDuration: 0,
-                                incomingCalls: 0,
-                                incomingDuration: 0,
-                                totalCalls: 0,
-                                totalDuration: 0
-                            };
-                        }
-
-                        // 更新統計數據
-                        callData.users[userName].outgoingCalls++;
-                        callData.users[userName].outgoingDuration += duration;
-                        callData.users[userName].totalCalls++;
+                        // 成功通話
+                        callData.users[userName].successfulCalls++;
                         callData.users[userName].totalDuration += duration;
+                        callData.users[userName].totalAttempts++;
 
-                        callData.totalCalls++;
+                        callData.successfulCalls++;
                         callData.totalDuration += duration;
+                        callData.totalAttempts++;
+                        callData.totalCalls++;
                     }
                 }
 
-                // 也要統計未接來電、取消通話等
-                const otherCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+(未接來電|您已取消通話|無人接聽)$/);
-                if (otherCallMatch) {
-                    const userName = otherCallMatch[4].trim();
-                    const callType = otherCallMatch[5].trim();
+                // 匹配失敗的通話：未接來電、取消通話、無人接聽
+                const failedCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+(未接來電|您已取消通話|無人接聽)$/);
+                if (failedCallMatch) {
+                    const userName = failedCallMatch[4].trim();
+                    const callType = failedCallMatch[5].trim();
 
                     if (!callData.users[userName]) {
                         callData.users[userName] = {
                             name: userName,
-                            outgoingCalls: 0,
-                            outgoingDuration: 0,
-                            incomingCalls: 0,
-                            incomingDuration: 0,
-                            totalCalls: 0,
-                            totalDuration: 0
+                            successfulCalls: 0,
+                            failedCalls: 0,
+                            totalDuration: 0,
+                            totalAttempts: 0
                         };
                     }
 
-                    // 這些也算作撥出電話（但沒有通話時間）
+                    // 只有「您已取消通話」和「無人接聽」算作撥出失敗
+                    // 「未接來電」是別人打來的，不算在撥出統計中
                     if (callType === '您已取消通話' || callType === '無人接聽') {
-                        callData.users[userName].outgoingCalls++;
-                        callData.users[userName].totalCalls++;
-                        callData.totalCalls++;
+                        callData.users[userName].failedCalls++;
+                        callData.users[userName].totalAttempts++;
+                        callData.totalAttempts++;
                     }
                 }
             }
-
-            // 分析來電方向（根據對話內容推斷）
-            analyzeCallDirections();
 
             setTimeout(() => {
                 hideLoading();
                 displayResults();
             }, 500);
-        }
-
-        function analyzeCallDirections() {
-            // 這裡可以根據更複雜的邏輯來分析通話方向
-            // 目前簡化處理，將所有通話都視為撥出
-            // 實際上可以根據上下文或其他標記來判斷
         }
 
         function formatDuration(seconds) {
@@ -573,16 +566,16 @@
             totalCallsElement.textContent = callData.totalCalls;
             totalDurationElement.textContent = formatDuration(callData.totalDuration);
 
-            const avgDuration = callData.totalCalls > 0 ?
-                Math.round(callData.totalDuration / callData.totalCalls) : 0;
+            const avgDuration = callData.successfulCalls > 0 ?
+                Math.round(callData.totalDuration / callData.successfulCalls) : 0;
             avgDurationElement.textContent = formatDuration(avgDuration);
 
             // 顯示用戶統計
             userStatsElement.innerHTML = '';
 
-            // 按總通話次數排序
+            // 按總撥出次數排序
             const sortedUsers = Object.values(callData.users)
-                .sort((a, b) => b.totalCalls - a.totalCalls);
+                .sort((a, b) => b.totalAttempts - a.totalAttempts);
 
             if (sortedUsers.length === 0) {
                 userStatsElement.innerHTML = '<p style="text-align: center; color: #666;">未找到通話記錄</p>';
@@ -600,8 +593,11 @@
             const card = document.createElement('div');
             card.className = 'user-card';
 
-            const avgCallDuration = user.totalCalls > 0 ?
-                Math.round(user.totalDuration / user.totalCalls) : 0;
+            const avgCallDuration = user.successfulCalls > 0 ?
+                Math.round(user.totalDuration / user.successfulCalls) : 0;
+
+            const successRate = user.totalAttempts > 0 ?
+                Math.round((user.successfulCalls / user.totalAttempts) * 100) : 0;
 
             card.innerHTML = `
                 <div class="user-header">
@@ -611,8 +607,12 @@
                 
                 <div class="user-stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value">${user.totalCalls}</div>
-                        <div class="stat-label">總通話次數</div>
+                        <div class="stat-value">${user.totalAttempts}</div>
+                        <div class="stat-label">總撥出次數</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${user.successfulCalls}</div>
+                        <div class="stat-label">成功通話次數</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value">${formatDuration(user.totalDuration)}</div>
@@ -622,22 +622,23 @@
                         <div class="stat-value">${formatDuration(avgCallDuration)}</div>
                         <div class="stat-label">平均通話時長</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value">${user.outgoingCalls}</div>
-                        <div class="stat-label">撥出次數</div>
-                    </div>
                 </div>
                 
                 <div class="call-direction-stats">
                     <div class="direction-title">📊 詳細統計</div>
                     <div class="direction-item">
-                        <span class="direction-label">撥出通話時長</span>
-                        <span class="direction-value">${formatDuration(user.outgoingDuration)}</span>
+                        <span class="direction-label">成功通話率</span>
+                        <span class="direction-value" style="color: ${successRate >= 70 ? '#00B900' : successRate >= 50 ? '#FFA500' : '#FF4444'}">
+                            ${successRate}%
+                        </span>
                     </div>
                     <div class="direction-item">
-                        <span class="direction-label">成功通話率</span>
-                        <span class="direction-value">${user.totalDuration > 0 ?
-                    Math.round((user.outgoingDuration > 0 ? user.outgoingCalls : 0) / user.totalCalls * 100) : 0}%</span>
+                        <span class="direction-label">失敗次數</span>
+                        <span class="direction-value">${user.failedCalls} 次</span>
+                    </div>
+                    <div class="direction-item">
+                        <span class="direction-label">最長單次通話</span>
+                        <span class="direction-value" id="maxDuration-${user.name}">計算中...</span>
                     </div>
                 </div>
             `;
@@ -692,27 +693,41 @@
                     <h3 class="analysis-title">📱 個人通話統計</h3>
                     <div class="user-stats" id="userStats"></div>
                 </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="exportResults()">📥 匯出分析結果</button>
+                </div>
             `;
         }
 
-        // 新增匯出功能
+        // 匯出功能
         function exportResults() {
             if (Object.keys(callData.users).length === 0) {
                 alert('沒有數據可以匯出');
                 return;
             }
 
-            let csvContent = "使用者,總通話次數,總通話時長(秒),總通話時長(格式化),平均通話時長(秒),撥出次數,撥出時長(秒)\n";
+            let csvContent = "使用者,總撥出次數,成功通話次數,失敗次數,成功通話率(%),總通話時長(秒),總通話時長(格式化),平均通話時長(秒)\n";
 
             Object.values(callData.users).forEach(user => {
-                const avgDuration = user.totalCalls > 0 ? Math.round(user.totalDuration / user.totalCalls) : 0;
-                csvContent += `${user.name},${user.totalCalls},${user.totalDuration},${formatDuration(user.totalDuration)},${avgDuration},${user.outgoingCalls},${user.outgoingDuration}\n`;
+                const avgDuration = user.successfulCalls > 0 ? Math.round(user.totalDuration / user.successfulCalls) : 0;
+                const successRate = user.totalAttempts > 0 ? Math.round((user.successfulCalls / user.totalAttempts) * 100) : 0;
+
+                csvContent += `${user.name},${user.totalAttempts},${user.successfulCalls},${user.failedCalls},${successRate},${user.totalDuration},${formatDuration(user.totalDuration)},${avgDuration}\n`;
             });
+
+            // 加入總計
+            const totalSuccessRate = callData.totalAttempts > 0 ?
+                Math.round((callData.successfulCalls / callData.totalAttempts) * 100) : 0;
+            const totalAvgDuration = callData.successfulCalls > 0 ?
+                Math.round(callData.totalDuration / callData.successfulCalls) : 0;
+
+            csvContent += `\n總計,${callData.totalAttempts},${callData.successfulCalls},${callData.totalAttempts - callData.successfulCalls},${totalSuccessRate},${callData.totalDuration},${formatDuration(callData.totalDuration)},${totalAvgDuration}\n`;
 
             const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `LINE通話分析_${new Date().toLocaleDateString('zh-TW')}.csv`;
+            link.download = `LINE通話分析_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.csv`;
             link.click();
         }
     </script>
