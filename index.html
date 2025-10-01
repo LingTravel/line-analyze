@@ -5,7 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LINE通話記錄分析器</title>
+
+    <!-- 引入源樣明體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            /* 預設主題 - 白底黑字 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-tertiary: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --accent-color: #00B900;
+            --accent-hover: #00D919;
+            --card-bg: #ffffff;
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+        }
+
+        /* 深色主題 */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --text-tertiary: #b0b0b0;
+            --border-color: #4d4d4d;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --accent-color: #00D919;
+            --accent-hover: #00FF1F;
+            --card-bg: #2d2d2d;
+        }
+
+        /* LINE主題 */
+        [data-theme="line"] {
+            --bg-primary: #f7f7f7;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8e8e8;
+            --text-primary: #1e1e1e;
+            --text-secondary: #484848;
+            --text-tertiary: #7c7c7c;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --accent-color: #00B900;
+            --accent-hover: #00D919;
+            --card-bg: #ffffff;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,63 +67,139 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Noto Serif TC', serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
             min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* 主題切換器 */
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-btn.active {
+            border-color: var(--accent-color);
+        }
+
+        .theme-btn.light {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #e0e0e0;
+        }
+
+        .theme-btn.dark {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .theme-btn.line {
+            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
+            color: #ffffff;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            padding-top: 80px;
         }
 
         .header {
             text-align: center;
             margin-bottom: 40px;
-            color: white;
+            animation: fadeInDown 0.8s ease;
         }
 
         .header h1 {
             font-size: 2.5em;
+            font-weight: 700;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
             font-size: 1.2em;
-            opacity: 0.9;
+            color: var(--text-secondary);
         }
 
         .upload-section {
-            background: white;
+            background: var(--card-bg);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px var(--shadow-color);
             margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
         }
 
         .file-upload {
-            border: 3px dashed #00B900;
+            border: 3px dashed var(--accent-color);
             border-radius: 15px;
             padding: 60px 40px;
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
-            background-color: #f8fff8;
+            background-color: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .file-upload:hover::before {
+            opacity: 0.1;
         }
 
         .file-upload:hover {
-            border-color: #00D919;
-            background-color: #f0fff0;
+            border-color: var(--accent-hover);
             transform: translateY(-2px);
         }
 
         .file-upload.dragover {
-            background-color: #e8ffe8;
-            border-color: #00D919;
+            background-color: var(--bg-tertiary);
+            border-color: var(--accent-hover);
         }
 
         .file-upload input[type="file"] {
@@ -78,26 +208,48 @@
 
         .upload-icon {
             font-size: 4em;
-            color: #00B900;
+            color: var(--accent-color);
             margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
         }
 
         .upload-text h3 {
             font-size: 1.5em;
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 10px;
+            font-weight: 500;
         }
 
         .upload-text p {
-            color: #666;
+            color: var(--text-secondary);
         }
 
         .results-section {
-            background: white;
+            background: var(--card-bg);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px var(--shadow-color);
             display: none;
+            animation: fadeIn 0.8s ease;
         }
 
         .summary-cards {
@@ -108,28 +260,49 @@
         }
 
         .summary-card {
-            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: all 0.3s ease;
         }
 
         .summary-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .summary-card:hover::before {
+            top: -100%;
+            right: -100%;
         }
 
         .summary-number {
             font-size: 3em;
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .summary-label {
             font-size: 1.1em;
-            opacity: 0.9;
+            opacity: 0.95;
+            font-weight: 500;
         }
 
         .analysis-section {
@@ -138,10 +311,11 @@
 
         .analysis-title {
             font-size: 1.8em;
-            color: #333;
+            color: var(--text-primary);
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #00B900;
+            border-bottom: 3px solid var(--accent-color);
+            font-weight: 700;
         }
 
         .user-stats {
@@ -152,16 +326,18 @@
         }
 
         .user-card {
-            background: #f8f9fa;
+            background: var(--bg-secondary);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 3px 10px var(--shadow-color);
             transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
         }
 
         .user-card:hover {
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 20px var(--shadow-color);
             transform: translateY(-2px);
+            border-color: var(--accent-color);
         }
 
         .user-header {
@@ -169,28 +345,28 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid var(--border-color);
         }
 
         .user-avatar {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 700;
             margin-right: 15px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px var(--shadow-color);
         }
 
         .user-name {
             font-size: 1.4em;
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .user-stats-grid {
@@ -200,35 +376,37 @@
         }
 
         .stat-item {
-            background: white;
+            background: var(--bg-primary);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 5px var(--shadow-color);
+            border: 1px solid var(--border-color);
         }
 
         .stat-value {
             font-size: 1.8em;
-            font-weight: bold;
-            color: #00B900;
+            font-weight: 700;
+            color: var(--accent-color);
             margin-bottom: 5px;
         }
 
         .stat-label {
             font-size: 0.9em;
-            color: #666;
+            color: var(--text-secondary);
+            font-weight: 400;
         }
 
         .call-direction-stats {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
+            border-top: 2px solid var(--border-color);
         }
 
         .direction-title {
             font-size: 1.1em;
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 15px;
         }
 
@@ -237,7 +415,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .direction-item:last-child {
@@ -245,23 +423,40 @@
         }
 
         .direction-label {
-            color: #666;
+            color: var(--text-secondary);
             font-size: 0.95em;
         }
 
         .direction-value {
-            font-weight: bold;
-            color: #333;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .error-message {
-            background: #ff4444;
+            background: var(--error-color);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
             margin-top: 20px;
             display: none;
             align-items: center;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
         }
 
         .error-icon {
@@ -275,8 +470,8 @@
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #00B900;
+            border: 4px solid var(--bg-tertiary);
+            border-top: 4px solid var(--accent-color);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -294,22 +489,125 @@
             }
         }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .btn {
-            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
             color: white;
             padding: 12px 30px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
             font-size: 1em;
-            font-weight: bold;
+            font-weight: 500;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            margin: 10px 5px;
+            display: inline-block;
+            box-shadow: 0 3px 10px var(--shadow-color);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .debug-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .debug-panel h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .debug-info {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progress-animation 1.5s ease-in-out infinite;
+        }
+
+        @keyframes progress-animation {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         @media (max-width: 768px) {
@@ -324,11 +622,52 @@
             .summary-cards {
                 grid-template-columns: 1fr;
             }
+
+            .theme-switcher {
+                top: 10px;
+                right: 10px;
+            }
+
+            .container {
+                padding-top: 60px;
+            }
+        }
+
+        /* 確保中文字體正確顯示 */
+        @font-face {
+            font-family: 'Noto Serif TC Fallback';
+            src: local('Noto Serif TC'), local('源樣明體'), local('思源宋體');
+        }
+
+        /* 列印樣式 */
+        @media print {
+
+            .theme-switcher,
+            .btn,
+            .file-upload {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .user-card {
+                break-inside: avoid;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- 主題切換器 -->
+    <div class="theme-switcher">
+        <div class="theme-btn light active" onclick="setTheme('light')" title="淺色主題">☀️</div>
+        <div class="theme-btn dark" onclick="setTheme('dark')" title="深色主題">🌙</div>
+        <div class="theme-btn line" onclick="setTheme('line')" title="LINE主題">💚</div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>📞 LINE通話記錄分析器</h1>
@@ -344,6 +683,9 @@
                 </div>
                 <input type="file" id="fileInput" accept=".txt">
             </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
             <div class="error-message" id="errorMessage">
                 <span class="error-icon">⚠️</span>
                 <span id="errorText"></span>
@@ -351,7 +693,7 @@
         </div>
 
         <div class="results-section" id="resultsSection">
-            <h2 style="margin-bottom: 30px; color: #333;">📊 通話分析結果</h2>
+            <h2 style="margin-bottom: 30px; color: var(--text-primary); font-weight: 700;">📊 通話分析結果</h2>
 
             <div class="summary-cards">
                 <div class="summary-card">
@@ -372,17 +714,61 @@
                 <h3 class="analysis-title">📱 個人通話統計</h3>
                 <div class="user-stats" id="userStats"></div>
             </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="exportResults()">📥 匯出分析結果</button>
+                <button class="btn btn-secondary" onclick="toggleDebug()">🔧 Debug資訊</button>
+            </div>
+
+            <div class="debug-panel" id="debugPanel">
+                <h3>Debug 資訊</h3>
+                <div class="debug-info" id="debugInfo"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // 全域變數
         let callData = {
             users: {},
             totalCalls: 0,
             totalDuration: 0,
             totalAttempts: 0,
-            successfulCalls: 0
+            successfulCalls: 0,
+            debugInfo: {
+                fileSize: 0,
+                totalLines: 0,
+                parsedLines: 0,
+                errors: [],
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            }
         };
+
+        // 主題設置
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('preferred-theme', theme);
+
+            // 更新按鈕狀態
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            if (theme === 'light') {
+                document.querySelector('.theme-btn.light').classList.add('active');
+            } else if (theme === 'dark') {
+                document.querySelector('.theme-btn.dark').classList.add('active');
+            } else if (theme === 'line') {
+                document.querySelector('.theme-btn.line').classList.add('active');
+            }
+        }
+
+        // 載入儲存的主題
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('preferred-theme') || 'light';
+            setTheme(savedTheme);
+        });
 
         // 初始化拖放功能
         const fileUploadArea = document.getElementById('fileUploadArea');
@@ -392,15 +778,19 @@
 
         fileUploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.add('dragover');
         });
 
-        fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.remove('dragover');
         });
 
         fileUploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             fileUploadArea.classList.remove('dragover');
 
             const files = e.dataTransfer.files;
@@ -421,37 +811,55 @@
                 return;
             }
 
+            callData.debugInfo.fileSize = file.size;
+
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
                     analyzeLineData(e.target.result);
                 } catch (error) {
                     showError('文件解析失敗，請確認文件格式正確');
+                    callData.debugInfo.errors.push(error.toString());
                     console.error('解析錯誤:', error);
                 }
             };
+
+            // 確保使用UTF-8編碼讀取，避免編碼問題
             reader.readAsText(file, 'UTF-8');
         }
 
+        // 統一的時間解析函數，確保跨設備一致性
         function parseCallDuration(durationStr) {
+            if (!durationStr || typeof durationStr !== 'string') {
+                return 0;
+            }
+
             let totalSeconds = 0;
 
+            // 移除所有空格，統一處理
+            const cleanStr = durationStr.trim().replace(/\s+/g, '');
+
             // 匹配 HH:MM:SS 格式
-            const hhmmssMatch = durationStr.match(/(\d+):(\d+):(\d+)/);
+            const hhmmssMatch = cleanStr.match(/^(\d+):(\d+):(\d+)$/);
             if (hhmmssMatch) {
-                const hours = parseInt(hhmmssMatch[1]) || 0;
-                const minutes = parseInt(hhmmssMatch[2]) || 0;
-                const seconds = parseInt(hhmmssMatch[3]) || 0;
+                const hours = parseInt(hhmmssMatch[1], 10) || 0;
+                const minutes = parseInt(hhmmssMatch[2], 10) || 0;
+                const seconds = parseInt(hhmmssMatch[3], 10) || 0;
                 totalSeconds = hours * 3600 + minutes * 60 + seconds;
             }
             // 匹配 MM:SS 格式
             else {
-                const mmssMatch = durationStr.match(/(\d+):(\d+)/);
+                const mmssMatch = cleanStr.match(/^(\d+):(\d+)$/);
                 if (mmssMatch) {
-                    const minutes = parseInt(mmssMatch[1]) || 0;
-                    const seconds = parseInt(mmssMatch[2]) || 0;
+                    const minutes = parseInt(mmssMatch[1], 10) || 0;
+                    const seconds = parseInt(mmssMatch[2], 10) || 0;
                     totalSeconds = minutes * 60 + seconds;
                 }
+            }
+
+            // 記錄解析結果用於debug
+            if (totalSeconds > 0) {
+                callData.debugInfo.parsedLines++;
             }
 
             return totalSeconds;
@@ -460,6 +868,7 @@
         function analyzeLineData(content) {
             hideError();
             showLoading();
+            showProgress();
 
             // 重置數據
             callData = {
@@ -467,76 +876,120 @@
                 totalCalls: 0,
                 totalDuration: 0,
                 totalAttempts: 0,
-                successfulCalls: 0
+                successfulCalls: 0,
+                debugInfo: {
+                    fileSize: callData.debugInfo.fileSize,
+                    totalLines: 0,
+                    parsedLines: 0,
+                    errors: [],
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString()
+                }
             };
 
-            const lines = content.split('\n');
+            // 統一換行符號處理（解決跨平台問題）
+            const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const lines = normalizedContent.split('\n');
+            callData.debugInfo.totalLines = lines.length;
+
+            let processedLines = 0;
+            const totalLines = lines.length;
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
-                if (!line) continue;
+                processedLines++;
 
-                // 匹配成功的通話記錄：時間 使用者名稱 ☎ 通話時間XX:XX
-                const successfulCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+通話時間(.+)$/);
-
-                if (successfulCallMatch) {
-                    const userName = successfulCallMatch[4].trim();
-                    const durationStr = successfulCallMatch[5].trim();
-                    const duration = parseCallDuration(durationStr);
-
-                    // 初始化用戶數據
-                    if (!callData.users[userName]) {
-                        callData.users[userName] = {
-                            name: userName,
-                            successfulCalls: 0,
-                            failedCalls: 0,
-                            totalDuration: 0,
-                            totalAttempts: 0
-                        };
-                    }
-
-                    if (duration > 0) {
-                        // 成功通話
-                        callData.users[userName].successfulCalls++;
-                        callData.users[userName].totalDuration += duration;
-                        callData.users[userName].totalAttempts++;
-
-                        callData.successfulCalls++;
-                        callData.totalDuration += duration;
-                        callData.totalAttempts++;
-                        callData.totalCalls++;
-                    }
+                // 更新進度條
+                if (processedLines % 100 === 0) {
+                    updateProgress((processedLines / totalLines) * 100);
                 }
 
-                // 匹配失敗的通話：未接來電、取消通話、無人接聽
-                const failedCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+(未接來電|您已取消通話|無人接聽)$/);
-                if (failedCallMatch) {
-                    const userName = failedCallMatch[4].trim();
-                    const callType = failedCallMatch[5].trim();
+                if (!line) continue;
 
-                    if (!callData.users[userName]) {
-                        callData.users[userName] = {
-                            name: userName,
-                            successfulCalls: 0,
-                            failedCalls: 0,
-                            totalDuration: 0,
-                            totalAttempts: 0
-                        };
+                try {
+                    // 使用更嚴格的正則表達式匹配，避免誤判
+                    // 匹配成功的通話記錄：時間 使用者名稱 ☎ 通話時間XX:XX:XX 或 XX:XX
+                    const successfulCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+通話時間\s*(.+)$/u);
+
+                    if (successfulCallMatch) {
+                        const userName = successfulCallMatch[4].trim();
+                        const durationStr = successfulCallMatch[5].trim();
+                        const duration = parseCallDuration(durationStr);
+
+                        // 初始化用戶數據
+                        if (!callData.users[userName]) {
+                            callData.users[userName] = {
+                                name: userName,
+                                successfulCalls: 0,
+                                failedCalls: 0,
+                                totalDuration: 0,
+                                totalAttempts: 0,
+                                maxDuration: 0,
+                                callDetails: []
+                            };
+                        }
+
+                        if (duration > 0) {
+                            // 成功通話
+                            callData.users[userName].successfulCalls++;
+                            callData.users[userName].totalDuration += duration;
+                            callData.users[userName].totalAttempts++;
+                            callData.users[userName].maxDuration = Math.max(callData.users[userName].maxDuration, duration);
+                            callData.users[userName].callDetails.push({
+                                type: 'successful',
+                                duration: duration,
+                                line: i + 1
+                            });
+
+                            callData.successfulCalls++;
+                            callData.totalDuration += duration;
+                            callData.totalAttempts++;
+                            callData.totalCalls++;
+                        }
                     }
 
-                    // 只有「您已取消通話」和「無人接聽」算作撥出失敗
-                    // 「未接來電」是別人打來的，不算在撥出統計中
-                    if (callType === '您已取消通話' || callType === '無人接聽') {
-                        callData.users[userName].failedCalls++;
-                        callData.users[userName].totalAttempts++;
-                        callData.totalAttempts++;
+                    // 匹配失敗的通話：未接來電、取消通話、無人接聽
+                    const failedCallMatch = line.match(/^(上午|下午)(\d{2}):(\d{2})\s+(.+?)\s+☎\s+(未接來電|您已取消通話|無人接聽)$/u);
+                    if (failedCallMatch) {
+                        const userName = failedCallMatch[4].trim();
+                        const callType = failedCallMatch[5].trim();
+
+                        if (!callData.users[userName]) {
+                            callData.users[userName] = {
+                                name: userName,
+                                successfulCalls: 0,
+                                failedCalls: 0,
+                                totalDuration: 0,
+                                totalAttempts: 0,
+                                maxDuration: 0,
+                                callDetails: []
+                            };
+                        }
+
+                        // 只有「您已取消通話」和「無人接聽」算作撥出失敗
+                        if (callType === '您已取消通話' || callType === '無人接聽') {
+                            callData.users[userName].failedCalls++;
+                            callData.users[userName].totalAttempts++;
+                            callData.users[userName].callDetails.push({
+                                type: 'failed',
+                                reason: callType,
+                                line: i + 1
+                            });
+                            callData.totalAttempts++;
+                        }
                     }
+                } catch (error) {
+                    callData.debugInfo.errors.push(`Line ${i + 1}: ${error.toString()}`);
                 }
             }
 
+            updateProgress(100);
+
             setTimeout(() => {
                 hideLoading();
+                hideProgress();
                 displayResults();
+                updateDebugInfo();
             }, 500);
         }
 
@@ -563,7 +1016,7 @@
             const userStatsElement = document.getElementById('userStats');
 
             // 顯示總計數據
-            totalCallsElement.textContent = callData.totalCalls;
+            totalCallsElement.textContent = callData.totalCalls.toLocaleString('zh-TW');
             totalDurationElement.textContent = formatDuration(callData.totalDuration);
 
             const avgDuration = callData.successfulCalls > 0 ?
@@ -578,7 +1031,7 @@
                 .sort((a, b) => b.totalAttempts - a.totalAttempts);
 
             if (sortedUsers.length === 0) {
-                userStatsElement.innerHTML = '<p style="text-align: center; color: #666;">未找到通話記錄</p>';
+                userStatsElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">未找到通話記錄</p>';
             } else {
                 sortedUsers.forEach(user => {
                     const userCard = createUserCard(user);
@@ -599,6 +1052,10 @@
             const successRate = user.totalAttempts > 0 ?
                 Math.round((user.successfulCalls / user.totalAttempts) * 100) : 0;
 
+            let successRateColor = 'var(--success-color)';
+            if (successRate < 50) successRateColor = 'var(--error-color)';
+            else if (successRate < 70) successRateColor = 'var(--warning-color)';
+
             card.innerHTML = `
                 <div class="user-header">
                     <div class="user-avatar">${user.name.charAt(0)}</div>
@@ -607,11 +1064,11 @@
                 
                 <div class="user-stats-grid">
                     <div class="stat-item">
-                        <div class="stat-value">${user.totalAttempts}</div>
+                        <div class="stat-value">${user.totalAttempts.toLocaleString('zh-TW')}</div>
                         <div class="stat-label">總撥出次數</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-value">${user.successfulCalls}</div>
+                        <div class="stat-value">${user.successfulCalls.toLocaleString('zh-TW')}</div>
                         <div class="stat-label">成功通話次數</div>
                     </div>
                     <div class="stat-item">
@@ -628,17 +1085,17 @@
                     <div class="direction-title">📊 詳細統計</div>
                     <div class="direction-item">
                         <span class="direction-label">成功通話率</span>
-                        <span class="direction-value" style="color: ${successRate >= 70 ? '#00B900' : successRate >= 50 ? '#FFA500' : '#FF4444'}">
+                        <span class="direction-value" style="color: ${successRateColor}">
                             ${successRate}%
                         </span>
                     </div>
                     <div class="direction-item">
                         <span class="direction-label">失敗次數</span>
-                        <span class="direction-value">${user.failedCalls} 次</span>
+                        <span class="direction-value">${user.failedCalls.toLocaleString('zh-TW')} 次</span>
                     </div>
                     <div class="direction-item">
                         <span class="direction-label">最長單次通話</span>
-                        <span class="direction-value" id="maxDuration-${user.name}">計算中...</span>
+                        <span class="direction-value">${formatDuration(user.maxDuration)}</span>
                     </div>
                 </div>
             `;
@@ -658,12 +1115,28 @@
             errorElement.style.display = 'none';
         }
 
+        function showProgress() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.display = 'block';
+        }
+
+        function hideProgress() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.display = 'none';
+            updateProgress(0);
+        }
+
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = `${percentage}%`;
+        }
+
         function showLoading() {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>正在分析通話記錄...</p>
+                    <p style="color: var(--text-primary);">正在分析通話記錄...</p>
                 </div>
             `;
             resultsSection.style.display = 'block';
@@ -672,7 +1145,7 @@
         function hideLoading() {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.innerHTML = `
-                <h2 style="margin-bottom: 30px; color: #333;">📊 通話分析結果</h2>
+                <h2 style="margin-bottom: 30px; color: var(--text-primary); font-weight: 700;">📊 通話分析結果</h2>
                 
                 <div class="summary-cards">
                     <div class="summary-card">
@@ -696,24 +1169,61 @@
                 
                 <div style="text-align: center; margin-top: 30px;">
                     <button class="btn" onclick="exportResults()">📥 匯出分析結果</button>
+                    <button class="btn btn-secondary" onclick="toggleDebug()">🔧 Debug資訊</button>
+                </div>
+
+                <div class="debug-panel" id="debugPanel">
+                    <h3>Debug 資訊</h3>
+                    <div class="debug-info" id="debugInfo"></div>
                 </div>
             `;
         }
 
-        // 匯出功能
+        function toggleDebug() {
+            const debugPanel = document.getElementById('debugPanel');
+            debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                debugInfo.innerHTML = `
+                    <strong>檔案資訊：</strong><br>
+                    檔案大小: ${(callData.debugInfo.fileSize / 1024).toFixed(2)} KB<br>
+                    總行數: ${callData.debugInfo.totalLines}<br>
+                    成功解析行數: ${callData.debugInfo.parsedLines}<br>
+                    <br>
+                    <strong>統計資訊：</strong><br>
+                    總撥出次數: ${callData.totalAttempts}<br>
+                    成功通話: ${callData.successfulCalls}<br>
+                    失敗通話: ${callData.totalAttempts - callData.successfulCalls}<br>
+                    總通話時長: ${formatDuration(callData.totalDuration)}<br>
+                    <br>
+                    <strong>系統資訊：</strong><br>
+                    瀏覽器: ${callData.debugInfo.userAgent}<br>
+                    分析時間: ${callData.debugInfo.timestamp}<br>
+                    <br>
+                    <strong>錯誤記錄：</strong><br>
+                    ${callData.debugInfo.errors.length > 0 ? callData.debugInfo.errors.join('<br>') : '無錯誤'}
+                `;
+            }
+        }
+
         function exportResults() {
             if (Object.keys(callData.users).length === 0) {
                 alert('沒有數據可以匯出');
                 return;
             }
 
-            let csvContent = "使用者,總撥出次數,成功通話次數,失敗次數,成功通話率(%),總通話時長(秒),總通話時長(格式化),平均通話時長(秒)\n";
+            // 使用BOM確保Excel正確讀取UTF-8
+            const BOM = '\uFEFF';
+            let csvContent = BOM + "使用者,總撥出次數,成功通話次數,失敗次數,成功通話率(%),總通話時長(秒),總通話時長(格式化),平均通話時長(秒),最長通話(秒)\n";
 
             Object.values(callData.users).forEach(user => {
                 const avgDuration = user.successfulCalls > 0 ? Math.round(user.totalDuration / user.successfulCalls) : 0;
                 const successRate = user.totalAttempts > 0 ? Math.round((user.successfulCalls / user.totalAttempts) * 100) : 0;
 
-                csvContent += `${user.name},${user.totalAttempts},${user.successfulCalls},${user.failedCalls},${successRate},${user.totalDuration},${formatDuration(user.totalDuration)},${avgDuration}\n`;
+                csvContent += `"${user.name}",${user.totalAttempts},${user.successfulCalls},${user.failedCalls},${successRate},${user.totalDuration},"${formatDuration(user.totalDuration)}",${avgDuration},${user.maxDuration}\n`;
             });
 
             // 加入總計
@@ -722,14 +1232,20 @@
             const totalAvgDuration = callData.successfulCalls > 0 ?
                 Math.round(callData.totalDuration / callData.successfulCalls) : 0;
 
-            csvContent += `\n總計,${callData.totalAttempts},${callData.successfulCalls},${callData.totalAttempts - callData.successfulCalls},${totalSuccessRate},${callData.totalDuration},${formatDuration(callData.totalDuration)},${totalAvgDuration}\n`;
+            csvContent += `\n"總計",${callData.totalAttempts},${callData.successfulCalls},${callData.totalAttempts - callData.successfulCalls},${totalSuccessRate},${callData.totalDuration},"${formatDuration(callData.totalDuration)}",${totalAvgDuration},-\n`;
 
-            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `LINE通話分析_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.csv`;
+            const date = new Date().toLocaleDateString('zh-TW').replace(/\//g, '-');
+            link.download = `LINE通話分析_${date}.csv`;
             link.click();
         }
+
+        // 防止記憶體洩漏
+        window.addEventListener('beforeunload', () => {
+            callData = null;
+        });
     </script>
 </body>
 
