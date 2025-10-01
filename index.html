@@ -13,51 +13,57 @@
 
     <style>
         :root {
-            /* 預設主題 - 白底黑字 */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #212529;
-            --text-secondary: #495057;
-            --text-tertiary: #6c757d;
-            --border-color: #dee2e6;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --accent-color: #00B900;
-            --accent-hover: #00D919;
-            --card-bg: #ffffff;
-            --error-color: #dc3545;
-            --warning-color: #ffc107;
-            --success-color: #28a745;
+            /* 預設主題 - 橘色系 */
+            --bg-primary: #FFF5F0;
+            --bg-secondary: #FFE8DD;
+            --bg-tertiary: #FFDCC8;
+            --text-primary: #2D1810;
+            --text-secondary: #5A3426;
+            --text-tertiary: #8B5A3C;
+            --border-color: #FFD0B0;
+            --shadow-color: rgba(255, 140, 66, 0.15);
+            --accent-color: #FF8C42;
+            --accent-hover: #FF6B1A;
+            --accent-gradient-start: #FF8C42;
+            --accent-gradient-end: #FF6B1A;
+            --card-bg: #FFFFFF;
+            --error-color: #E74C3C;
+            --warning-color: #F39C12;
+            --success-color: #27AE60;
         }
 
-        /* 深色主題 */
+        /* 深色主題 - 深橘色系 */
         [data-theme="dark"] {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-tertiary: #3d3d3d;
-            --text-primary: #ffffff;
-            --text-secondary: #e0e0e0;
-            --text-tertiary: #b0b0b0;
-            --border-color: #4d4d4d;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --accent-color: #00D919;
-            --accent-hover: #00FF1F;
-            --card-bg: #2d2d2d;
+            --bg-primary: #1A0F0A;
+            --bg-secondary: #2D1810;
+            --bg-tertiary: #3D2418;
+            --text-primary: #FFE8DD;
+            --text-secondary: #FFCEB0;
+            --text-tertiary: #FFB090;
+            --border-color: #5A3426;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --accent-color: #FF8C42;
+            --accent-hover: #FF9F65;
+            --accent-gradient-start: #FF8C42;
+            --accent-gradient-end: #FFB380;
+            --card-bg: #2D1810;
         }
 
-        /* LINE主題 */
-        [data-theme="line"] {
-            --bg-primary: #f7f7f7;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #e8e8e8;
-            --text-primary: #1e1e1e;
-            --text-secondary: #484848;
-            --text-tertiary: #7c7c7c;
-            --border-color: #e0e0e0;
-            --shadow-color: rgba(0, 0, 0, 0.08);
-            --accent-color: #00B900;
-            --accent-hover: #00D919;
-            --card-bg: #ffffff;
+        /* 活潑橘主題 */
+        [data-theme="vibrant"] {
+            --bg-primary: #FFF0E6;
+            --bg-secondary: #FFE0CC;
+            --bg-tertiary: #FFD0B3;
+            --text-primary: #2C1810;
+            --text-secondary: #5C3420;
+            --text-tertiary: #8C5030;
+            --border-color: #FFB899;
+            --shadow-color: rgba(255, 102, 0, 0.12);
+            --accent-color: #FF6600;
+            --accent-hover: #FF8833;
+            --accent-gradient-start: #FF6600;
+            --accent-gradient-end: #FFAA00;
+            --card-bg: #FFFFFF;
         }
 
         * {
@@ -70,7 +76,7 @@
             font-family: 'Noto Serif TC', serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--text-primary);
-            background-color: var(--bg-primary);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
             min-height: 100vh;
             transition: all 0.3s ease;
         }
@@ -84,9 +90,15 @@
             background: var(--card-bg);
             padding: 10px;
             border-radius: 30px;
-            box-shadow: 0 2px 10px var(--shadow-color);
+            box-shadow: 0 4px 15px var(--shadow-color);
             display: flex;
             gap: 10px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme="dark"] .theme-switcher {
+            background: rgba(45, 24, 16, 0.9);
         }
 
         .theme-btn {
@@ -108,22 +120,22 @@
 
         .theme-btn.active {
             border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-color);
         }
 
         .theme-btn.light {
-            background: #ffffff;
-            color: #000000;
-            border: 2px solid #e0e0e0;
+            background: linear-gradient(135deg, #FFF5F0, #FFE8DD);
+            color: #FF8C42;
         }
 
         .theme-btn.dark {
-            background: #1a1a1a;
-            color: #ffffff;
+            background: linear-gradient(135deg, #1A0F0A, #2D1810);
+            color: #FF8C42;
         }
 
-        .theme-btn.line {
-            background: linear-gradient(135deg, #00B900 0%, #00D919 100%);
-            color: #ffffff;
+        .theme-btn.vibrant {
+            background: linear-gradient(135deg, #FF6600, #FFAA00);
+            color: #FFFFFF;
         }
 
         .container {
@@ -143,10 +155,11 @@
             font-size: 2.5em;
             font-weight: 700;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 2px 10px var(--shadow-color);
         }
 
         .header p {
@@ -161,6 +174,7 @@
             box-shadow: 0 10px 30px var(--shadow-color);
             margin-bottom: 30px;
             animation: fadeInUp 0.8s ease;
+            border: 1px solid var(--border-color);
         }
 
         .file-upload {
@@ -170,7 +184,7 @@
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
-            background-color: var(--bg-secondary);
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
             position: relative;
             overflow: hidden;
         }
@@ -189,17 +203,24 @@
         }
 
         .file-upload:hover::before {
-            opacity: 0.1;
+            opacity: 0.15;
         }
 
         .file-upload:hover {
             border-color: var(--accent-hover);
             transform: translateY(-2px);
+            box-shadow: 0 5px 20px var(--shadow-color);
         }
 
         .file-upload.dragover {
-            background-color: var(--bg-tertiary);
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
             border-color: var(--accent-hover);
+        }
+
+        .file-upload.dragover .upload-icon,
+        .file-upload.dragover .upload-text h3,
+        .file-upload.dragover .upload-text p {
+            color: white;
         }
 
         .file-upload input[type="file"] {
@@ -211,6 +232,7 @@
             color: var(--accent-color);
             margin-bottom: 20px;
             animation: bounce 2s infinite;
+            filter: drop-shadow(0 4px 6px var(--shadow-color));
         }
 
         @keyframes bounce {
@@ -250,6 +272,7 @@
             box-shadow: 0 10px 30px var(--shadow-color);
             display: none;
             animation: fadeIn 0.8s ease;
+            border: 1px solid var(--border-color);
         }
 
         .summary-cards {
@@ -260,12 +283,12 @@
         }
 
         .summary-card {
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px var(--shadow-color);
+            box-shadow: 0 8px 25px var(--shadow-color);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -285,6 +308,7 @@
 
         .summary-card:hover {
             transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 35px var(--shadow-color);
         }
 
         .summary-card:hover::before {
@@ -297,12 +321,16 @@
             font-weight: 700;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
         }
 
         .summary-label {
             font-size: 1.1em;
             opacity: 0.95;
             font-weight: 500;
+            position: relative;
+            z-index: 1;
         }
 
         .analysis-section {
@@ -316,6 +344,10 @@
             padding-bottom: 10px;
             border-bottom: 3px solid var(--accent-color);
             font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .user-stats {
@@ -326,17 +358,17 @@
         }
 
         .user-card {
-            background: var(--bg-secondary);
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 3px 10px var(--shadow-color);
+            box-shadow: 0 5px 15px var(--shadow-color);
             transition: all 0.3s ease;
             border: 1px solid var(--border-color);
         }
 
         .user-card:hover {
-            box-shadow: 0 5px 20px var(--shadow-color);
-            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-color);
+            transform: translateY(-3px);
             border-color: var(--accent-color);
         }
 
@@ -352,7 +384,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -360,7 +392,7 @@
             font-size: 24px;
             font-weight: 700;
             margin-right: 15px;
-            box-shadow: 0 3px 10px var(--shadow-color);
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
 
         .user-name {
@@ -376,18 +408,27 @@
         }
 
         .stat-item {
-            background: var(--bg-primary);
+            background: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 2px 5px var(--shadow-color);
+            box-shadow: 0 2px 8px var(--shadow-color);
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
 
         .stat-value {
             font-size: 1.8em;
             font-weight: 700;
-            color: var(--accent-color);
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 5px;
         }
 
@@ -433,7 +474,7 @@
         }
 
         .error-message {
-            background: var(--error-color);
+            background: linear-gradient(135deg, #E74C3C, #C0392B);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
@@ -441,6 +482,7 @@
             display: none;
             align-items: center;
             animation: shake 0.5s ease;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
         }
 
         @keyframes shake {
@@ -477,6 +519,7 @@
             height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
+            box-shadow: 0 2px 10px var(--shadow-color);
         }
 
         @keyframes spin {
@@ -524,7 +567,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            background: linear-gradient(135deg, var(--accent-gradient-start) 0%, var(--accent-gradient-end) 100%);
             color: white;
             padding: 12px 30px;
             border: none;
@@ -535,12 +578,32 @@
             transition: all 0.3s ease;
             margin: 10px 5px;
             display: inline-block;
-            box-shadow: 0 3px 10px var(--shadow-color);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px var(--shadow-color);
+            box-shadow: 0 6px 20px var(--shadow-color);
         }
 
         .btn:active {
@@ -548,7 +611,7 @@
         }
 
         .btn-secondary {
-            background: var(--bg-tertiary);
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--border-color));
             color: var(--text-primary);
         }
 
@@ -559,6 +622,7 @@
             padding: 20px;
             margin-top: 20px;
             display: none;
+            box-shadow: inset 0 2px 8px var(--shadow-color);
         }
 
         .debug-panel h3 {
@@ -576,24 +640,27 @@
             border-radius: 5px;
             margin-bottom: 10px;
             overflow-x: auto;
+            border: 1px solid var(--border-color);
         }
 
         .progress-bar {
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: var(--bg-tertiary);
-            border-radius: 2px;
+            border-radius: 3px;
             overflow: hidden;
             margin-top: 20px;
             display: none;
+            box-shadow: inset 0 1px 3px var(--shadow-color);
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            background: linear-gradient(90deg, var(--accent-gradient-start), var(--accent-gradient-end));
             width: 0%;
             transition: width 0.3s ease;
             animation: progress-animation 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--accent-color);
         }
 
         @keyframes progress-animation {
@@ -663,9 +730,9 @@
 <body>
     <!-- 主題切換器 -->
     <div class="theme-switcher">
-        <div class="theme-btn light active" onclick="setTheme('light')" title="淺色主題">☀️</div>
-        <div class="theme-btn dark" onclick="setTheme('dark')" title="深色主題">🌙</div>
-        <div class="theme-btn line" onclick="setTheme('line')" title="LINE主題">💚</div>
+        <div class="theme-btn light active" onclick="setTheme('light')" title="淺橘主題">🍑</div>
+        <div class="theme-btn dark" onclick="setTheme('dark')" title="深橘主題">🌅</div>
+        <div class="theme-btn vibrant" onclick="setTheme('vibrant')" title="活潑橘主題">🔥</div>
     </div>
 
     <div class="container">
@@ -759,8 +826,8 @@
                 document.querySelector('.theme-btn.light').classList.add('active');
             } else if (theme === 'dark') {
                 document.querySelector('.theme-btn.dark').classList.add('active');
-            } else if (theme === 'line') {
-                document.querySelector('.theme-btn.line').classList.add('active');
+            } else if (theme === 'vibrant') {
+                document.querySelector('.theme-btn.vibrant').classList.add('active');
             }
         }
 
